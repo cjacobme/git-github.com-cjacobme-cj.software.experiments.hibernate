@@ -1,5 +1,7 @@
 package cj.software.experiments.hibernate.dao;
 
+import static org.assertj.core.api.Assertions.*;
+
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
@@ -55,8 +57,8 @@ public class InsertRoleTest
 		{
 			NativeQuery<?> lQuery = pSession
 					.createSQLQuery(
-							"INSERT INTO Movie (id, version, title, director) "
-									+ "VALUES(-3, 3, 'Ein Fisch namens Wanda', 'keine Ahnung')");
+							"INSERT INTO Movie (id, version, title, director, num_roles) "
+									+ "VALUES(-3, 3, 'Ein Fisch namens Wanda', 'keine Ahnung', 0)");
 			lQuery.executeUpdate();
 			lTransaction.commit();
 		}
@@ -87,6 +89,9 @@ public class InsertRoleTest
 		Transaction lTransaction = pSession.beginTransaction();
 		try
 		{
+			Movie lMovie = this.loadMovie(pSession);
+			lMovie.addRole(pRole);
+			pSession.save(lMovie);
 			pSession.save(pRole);
 			lTransaction.commit();
 			this.logger
@@ -116,7 +121,7 @@ public class InsertRoleTest
 		{
 			this.saveNativeMovie(pSession);
 			Movie lMovie = this.loadMovie(pSession);
-			for (int bCounter = 1; bCounter <= 4; bCounter++)
+			for (int bCounter = 1; bCounter <= 3; bCounter++)
 			{
 				Role lRole = Role
 						.builder()
@@ -124,8 +129,14 @@ public class InsertRoleTest
 						.withAppearanceTime(bCounter)
 						.withName(String.format("Role #%d", bCounter))
 						.build();
+
 				this.saveRole(pSession, lRole);
 			}
+
+			Movie lLoadedAfterInsertions = this.loadMovie(pSession);
+			int lVersion = lLoadedAfterInsertions.getVersion();
+			this.logger.info(String.format("version is %d", lVersion));
+			assertThat(lVersion).as("version").isEqualTo(6);
 		}
 	}
 }

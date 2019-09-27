@@ -1,11 +1,15 @@
 package cj.software.experiments.hibernate.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Version;
 
@@ -33,6 +37,12 @@ public class Movie
 	@Column(nullable = false)
 	private String director;
 
+	@OneToMany(orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = "movie")
+	private List<Role> roles = new ArrayList<>();
+
+	@Column(name = "num_roles")
+	private int numRoles = 0;
+
 	private Movie()
 	{
 
@@ -56,6 +66,21 @@ public class Movie
 	public int getVersion()
 	{
 		return this.version;
+	}
+
+	public boolean addRole(Role pRole)
+	{
+		boolean lResult = this.roles.add(pRole);
+		if (lResult)
+		{
+			this.numRoles++;
+		}
+		return lResult;
+	}
+
+	public int getNumRoles()
+	{
+		return this.numRoles;
 	}
 
 	public static Builder builder()

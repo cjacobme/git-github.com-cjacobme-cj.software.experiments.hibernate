@@ -21,6 +21,7 @@ import com.opentable.db.postgres.junit.EmbeddedPostgresRules;
 import com.opentable.db.postgres.junit.SingleInstancePostgresRule;
 
 import cj.software.experiments.hibernate.model.Movie;
+import cj.software.experiments.hibernate.model.Role;
 import cj.software.experiments.hibernate.util.HibernatUtil;
 
 public class InsertMovieTest
@@ -36,7 +37,7 @@ public class InsertMovieTest
 	public static void setupSessionFactory()
 	{
 		DataSource lDataSource = pg.getEmbeddedPostgres().getPostgresDatabase();
-		sessionFactory = HibernatUtil.createSessionFactory(lDataSource, Movie.class);
+		sessionFactory = HibernatUtil.createSessionFactory(lDataSource, Movie.class, Role.class);
 	}
 
 	@AfterClass
