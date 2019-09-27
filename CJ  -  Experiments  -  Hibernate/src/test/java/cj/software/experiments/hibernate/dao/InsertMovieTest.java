@@ -12,11 +12,18 @@ import javax.sql.DataSource;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.resource.transaction.spi.TransactionStatus;
 import org.junit.ClassRule;
 import org.junit.Test;
 
 import com.opentable.db.postgres.junit.EmbeddedPostgresRules;
 import com.opentable.db.postgres.junit.SingleInstancePostgresRule;
+
+import cj.software.experiments.hibernate.model.Movie;
+import cj.software.experiments.hibernate.util.HibernatUtil;
 
 public class InsertMovieTest
 {
@@ -26,29 +33,33 @@ public class InsertMovieTest
 	public static SingleInstancePostgresRule pg = EmbeddedPostgresRules.singleInstance();
 
 	@Test
-	public void connect() throws SQLException
+	public void insertMovie() throws SQLException
 	{
-		DataSource lPostgresDatabase = pg.getEmbeddedPostgres().getPostgresDatabase();
-		try (Connection pConnection = lPostgresDatabase.getConnection())
+		DataSource lDataSource = pg.getEmbeddedPostgres().getPostgresDatabase();
+		SessionFactory lSessionFactory = HibernatUtil
+				.createSessionFactory(lDataSource, Movie.class);
+		try (Session lSession = lSessionFactory.openSession())
 		{
-			this.logger.info("connected");
-			Statement lStmt = pConnection.createStatement();
-			ResultSet lRS = lStmt.executeQuery("select 1");
-			assertThat(lRS.next()).as("ResultSet").isTrue();
-			long lReturned = lRS.getLong(1);
-			assertThat(lReturned).as("returned").isEqualTo(1l);
-
-			DatabaseMetaData lMetaData = pConnection.getMetaData();
-			String lDatabaseProductName = lMetaData.getDatabaseProductName();
-			String lDatabaseProductVersion = lMetaData.getDatabaseProductVersion();
-			this.logger
-					.info(
-							String
-									.format(
-											"database product %s version %s",
-											lDatabaseProductName,
-											lDatabaseProductVersion));
+			Transaction lTransaction = lSession.beginTransaction();
+			try
+			{
+				Movie lMovie = Movie
+						.builder()
+						.withTitle("Apollo 13")
+						.withDirector("John Hughes")
+						.build();
+				lSession.save(lMovie);
+				lTransaction.commit();
+			}
+			finally
+			{
+				TransactionStatus lStatus = lTransaction.getStatus();
+				if (lStatus != TransactionStatus.COMMITTED)
+				{
+					this.logger.warn(String.format("tx rolling back: %s", lStatus));
+					lTransaction.rollback();
+				}
+			}
 		}
 	}
-
 }
