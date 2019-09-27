@@ -12,6 +12,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.resource.transaction.spi.TransactionStatus;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -36,6 +37,15 @@ public class InsertMovieTest
 	{
 		DataSource lDataSource = pg.getEmbeddedPostgres().getPostgresDatabase();
 		sessionFactory = HibernatUtil.createSessionFactory(lDataSource, Movie.class);
+	}
+
+	@AfterClass
+	public static void cleanUp()
+	{
+		if (sessionFactory != null)
+		{
+			sessionFactory.close();
+		}
 	}
 
 	@Test
