@@ -2,11 +2,7 @@ package cj.software.experiments.hibernate.dao;
 
 import static org.assertj.core.api.Assertions.*;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 import javax.sql.DataSource;
 
@@ -50,11 +46,15 @@ public class InsertMovieTest
 						.build();
 				lSession.save(lMovie);
 				lTransaction.commit();
+				Long lId = lMovie.getId();
+				assertThat(lId).isNotNull();
+				int lVersion = lMovie.getVersion();
+				this.logger.info(String.format("movie id = %d, version = %d", lId, lVersion));
 			}
 			finally
 			{
 				TransactionStatus lStatus = lTransaction.getStatus();
-				if (lStatus != TransactionStatus.COMMITTED)
+				if (lStatus != TransactionStatus.NOT_ACTIVE)
 				{
 					this.logger.warn(String.format("tx rolling back: %s", lStatus));
 					lTransaction.rollback();
