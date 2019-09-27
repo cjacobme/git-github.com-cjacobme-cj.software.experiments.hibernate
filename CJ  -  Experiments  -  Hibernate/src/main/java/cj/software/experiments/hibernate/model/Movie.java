@@ -1,5 +1,7 @@
 package cj.software.experiments.hibernate.model;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -13,7 +15,11 @@ import javax.persistence.Version;
 		initialValue = 1,
 		allocationSize = 1)
 public class Movie
+		implements
+		Serializable
 {
+	private static final long serialVersionUID = 1L;
+
 	@Id
 	@GeneratedValue(generator = "MovieIdGenerator")
 	private Long id;
