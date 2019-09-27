@@ -38,6 +38,26 @@ public class Movie
 
 	}
 
+	public Long getId()
+	{
+		return this.id;
+	}
+
+	public String getTitle()
+	{
+		return this.title;
+	}
+
+	public String getDirector()
+	{
+		return this.director;
+	}
+
+	public int getVersion()
+	{
+		return this.version;
+	}
+
 	public static Builder builder()
 	{
 		return new Builder();
