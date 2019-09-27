@@ -12,6 +12,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.resource.transaction.spi.TransactionStatus;
+import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 
@@ -28,13 +29,19 @@ public class InsertMovieTest
 	@ClassRule
 	public static SingleInstancePostgresRule pg = EmbeddedPostgresRules.singleInstance();
 
+	private static SessionFactory sessionFactory;
+
+	@BeforeClass
+	public static void setupSessionFactory()
+	{
+		DataSource lDataSource = pg.getEmbeddedPostgres().getPostgresDatabase();
+		sessionFactory = HibernatUtil.createSessionFactory(lDataSource, Movie.class);
+	}
+
 	@Test
 	public void insertMovie() throws SQLException
 	{
-		DataSource lDataSource = pg.getEmbeddedPostgres().getPostgresDatabase();
-		SessionFactory lSessionFactory = HibernatUtil
-				.createSessionFactory(lDataSource, Movie.class);
-		try (Session lSession = lSessionFactory.openSession())
+		try (Session lSession = sessionFactory.openSession())
 		{
 			Transaction lTransaction = lSession.beginTransaction();
 			try
